@@ -1,0 +1,11 @@
+#
+# user:
+#   nopass: (true | false) [FACULTATIVE]
+#   user_as:
+#       - command
+#
+
+keyboard-slayer:
+    nopass: true
+    root:
+        - ALL
