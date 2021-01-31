@@ -21,7 +21,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::ffi::CString;
-use std::process::exit;
+use std::process::{exit, Command};
 
 use yaml_rust::{YamlLoader, yaml::Yaml};
 use pwhash::{sha512_crypt, sha256_crypt, md5_crypt};
@@ -100,8 +100,23 @@ fn load_config(filename: String) -> Vec<Yaml>
 {
     let mut config: Vec<Yaml> = vec![];
 
-    if let Ok(content) = fs::read_to_string(filename)
+    if let Ok(content) = fs::read_to_string(filename.clone())
     {
+        let owner_raw = Command::new("ls")
+                            .arg("-l")
+                            .arg(filename)
+                            .output()
+                            .unwrap()
+                            .stdout;
+        
+        let owner = String::from_utf8_lossy(&owner_raw);
+        
+        if owner.split(" ").collect::<Vec<&str>>()[2] != "root" 
+        {
+            eprintln!("Operation not permitted !");
+            exit(1);
+        }
+
         match YamlLoader::load_from_str(content.as_str())
         {
             Ok(conf) => {
